@@ -31,4 +31,5 @@ class Product:
 
 
     def get_total_price(self):
+        # wttttfffff
         return self.price * self.quantity
