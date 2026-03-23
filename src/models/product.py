@@ -31,6 +31,7 @@ class Product:
 
 
     def get_total_price(self):
+        # wtf
         return self.price * self.quantity
 
     def check_stock(self):
