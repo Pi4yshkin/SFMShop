@@ -1,0 +1,38 @@
+* 23c96be расширен .gitignore  для Python проекта
+* f0aa3f1 Удалены файлы .gitignore для прописи вручную
+* bed87d7 добавлены файлы .gitignore в папки models и utils
+* a635b72 добавлен файл git_diff_analysis.txt с анализом изменений
+* f8417bd добавлены системные файлы .DS_Store
+* efd96fd добавлен файл git_diff_cashing.txt
+* 66fc936 добавлен файл git_diff_logging
+*   11072a6 Merge branch 'feature/add-logging' of github.com:Pi4yshkin/SFMShop
+|\  
+| * 21dc8a6 Добавлена система логирования
+| *   fc43a6f Разрешен конфликт в класса Product, осталены оба метода calculate_shipping и get_category
+| |\  
+| * | 1d30e4b Добавлен метод calculate_shipping в класс Product
+* | | b4c878e удаление лишней папки sfmshop_deleted
+* | | 3c10bcd переименование лишней папки перед удалением
+* | | eeceb88 Удален файт git_diff_cashing.txt
+* | | 26e1d75 Удален файл git_diff_logging.txt
+* | | 244956f Добавленs файлы с анализом изменений классов Logging и Cashing
+| |/  
+|/|   
+| | * 62a2ad3 Добавлена система кеширования
+| | * 9f17507 Добавлени система кеширования
+| |/  
+|/|   
+* | 816b1ad Добавлен метод get_category в класс Product
+|/  
+*   2eedde9 Разрешен конфликт в get_total_price
+|\  
+| * e9f9da3 Добавлен коммент в класс Product метод get_total_price
+| * 6e93d3d Добавлены методы управления складом в класс Product
+| * 492b70b Добавлены методы управления складов в класс Product
+* | ea63214 Добавлен коментарий в класс Product метод get_total price
+|/  
+*   aad52b2 заливка проекта на гит
+|\  
+| * 8c3abd6 Initial commit
+* ffd9384 Удаление ошибочно добавленного SFMShop
+* eeed3b1 Инициализация проекта
