@@ -1,0 +1,377 @@
+diff --git a/.DS_Store b/.DS_Store
+index bf9e32c..2a691a8 100644
+Binary files a/.DS_Store and b/.DS_Store differ
+diff --git a/SFMShop b/SFMShop
+new file mode 160000
+index 0000000..8c3abd6
+--- /dev/null
++++ b/SFMShop
+@@ -0,0 +1 @@
++Subproject commit 8c3abd6785a3afe3cfbffa2117d59dfb3e403c21
+diff --git a/git_branches.txt b/git_branches.txt
+new file mode 100644
+index 0000000..75b8624
+--- /dev/null
++++ b/git_branches.txt
+@@ -0,0 +1,7 @@
++  feature/add-inventory-manager
++* feature/add-shipping
++  main
++  remotes/origin/HEAD -> origin/main
++  remotes/origin/feature/add-inventory-manager
++  remotes/origin/feature/add-shipping
++  remotes/origin/main
+diff --git a/git_diff_cashing.txt b/git_diff_cashing.txt
+new file mode 100644
+index 0000000..ed8c265
+--- /dev/null
++++ b/git_diff_cashing.txt
+@@ -0,0 +1,8 @@
++diff --git a/src/utils/cashing.py b/src/utils/cashing.py
++new file mode 100644
++index 0000000..cd87afa
++--- /dev/null
+++++ b/src/utils/cashing.py
++@@ -0,0 +1,2 @@
+++class Cashing:
+++    pass
+diff --git a/git_diff_logging.txt b/git_diff_logging.txt
+index a71b624..efdf293 100644
+--- a/git_diff_logging.txt
++++ b/git_diff_logging.txt
+@@ -1,34 +1,28 @@
+-diff --git a/.DS_Store b/.DS_Store
+-index bf9e32c..2a691a8 100644
+-Binary files a/.DS_Store and b/.DS_Store differ
+-diff --git a/SFMShop b/SFMShop
+-new file mode 160000
+-index 0000000..8c3abd6
++diff --git a/src/models/product.py b/src/models/product.py
++index 005b763..e12f0a8 100644
++--- a/src/models/product.py
+++++ b/src/models/product.py
++@@ -31,7 +31,12 @@ class Product:
++ 
++ 
++     def get_total_price(self):
++-        return self.price * self.quantity
+++      return self.price * self.quantity
+++
+++    def calculate_shipping(self):
+++        pass
+++
+++
++ 
++     def get_category(self):
++         pass
++\ No newline at end of file
++diff --git a/src/utils/logger.py b/src/utils/logger.py
++new file mode 100644
++index 0000000..a3438d7
+ --- /dev/null
+-+++ b/SFMShop
+-@@ -0,0 +1 @@
+-+Subproject commit 8c3abd6785a3afe3cfbffa2117d59dfb3e403c21
+-diff --git a/git_show_example.txt b/git_show_example.txt
+-deleted file mode 100644
+-index 34944a3..0000000
+---- a/git_show_example.txt
+-+++ /dev/null
+-@@ -1,15 +0,0 @@
+--commit 21dc8a60b78fa49e0d031a1b838cd1a326f92312
+--Author: Alex Pi4yshkin <spk60150@gmail.com>
+--Date:   Tue Mar 24 14:18:47 2026 +0300
+--
+--    Добавлена система логирования
+--
+--diff --git a/src/utils/logger.py b/src/utils/logger.py
+--new file mode 100644
+--index 0000000..a3438d7
+----- /dev/null
+--+++ b/src/utils/logger.py
+--@@ -0,0 +1,2 @@
+--+class Logger:
+--+    pass
+--\ No newline at end of file
+-diff --git a/src/.DS_Store b/src/.DS_Store
+-index 3412848..1ac4296 100644
+-Binary files a/src/.DS_Store and b/src/.DS_Store differ
+++++ b/src/utils/logger.py
++@@ -0,0 +1,2 @@
+++class Logger:
+++    pass
++\ No newline at end of file
+diff --git a/git_history.txt b/git_history.txt
+new file mode 100644
+index 0000000..150002d
+--- /dev/null
++++ b/git_history.txt
+@@ -0,0 +1,74 @@
++*   commit fc43a6f3a8e2ed17407afd1a558a5fbf91846112
++|\  Merge: 1d30e4b 816b1ad
++| | Author: Alex Pi4yshkin <spk60150@gmail.com>
++| | Date:   Mon Mar 23 21:14:42 2026 +0300
++| | 
++| |     Разрешен конфликт в класса Product, осталены оба метода calculate_shipping и get_category
++| | 
++| * commit 816b1ad68276139cd59fe07d0a26eeeceb1648a3
++| | Author: Alex Pi4yshkin <spk60150@gmail.com>
++| | Date:   Mon Mar 23 21:09:50 2026 +0300
++| | 
++| |     Добавлен метод get_category в класс Product
++| | 
++* | commit 1d30e4b9a4a667d7f91341b575e1334fd7aa62c9
++|/  Author: Alex Pi4yshkin <spk60150@gmail.com>
++|   Date:   Mon Mar 23 21:07:04 2026 +0300
++|   
++|       Добавлен метод calculate_shipping в класс Product
++|   
++*   commit 2eedde90f0b98fc468ed815148bc6d207b9dc413
++|\  Merge: ea63214 e9f9da3
++| | Author: Alex Pi4yshkin <spk60150@gmail.com>
++| | Date:   Mon Mar 23 20:58:58 2026 +0300
++| | 
++| |     Разрешен конфликт в get_total_price
++| | 
++| * commit e9f9da39d0f432245856feb345019ccc5cbeb4a4
++| | Author: Alex Pi4yshkin <spk60150@gmail.com>
++| | Date:   Mon Mar 23 20:53:12 2026 +0300
++| | 
++| |     Добавлен коммент в класс Product метод get_total_price
++| | 
++| * commit 6e93d3d4a3e178671678109002667d9ecb1f4b88
++| | Author: Alex Pi4yshkin <spk60150@gmail.com>
++| | Date:   Mon Mar 23 11:26:12 2026 +0300
++| | 
++| |     Добавлены методы управления складом в класс Product
++| | 
++| * commit 492b70b19c39b4baad9b58bb558efc709f465892
++| | Author: Alex Pi4yshkin <spk60150@gmail.com>
++| | Date:   Mon Mar 23 11:17:31 2026 +0300
++| | 
++| |     Добавлены методы управления складов в класс Product
++| | 
++* | commit ea63214066e39de5f9af5c204c746513b7dcf121
++|/  Author: Alex Pi4yshkin <spk60150@gmail.com>
++|   Date:   Mon Mar 23 20:54:40 2026 +0300
++|   
++|       Добавлен коментарий в класс Product метод get_total price
++|   
++*   commit aad52b2358849b7b33c66535db4c6b5fa84c93a4
++|\  Merge: ffd9384 8c3abd6
++| | Author: Alex Pi4yshkin <spk60150@gmail.com>
++| | Date:   Mon Mar 23 10:40:09 2026 +0300
++| | 
++| |     заливка проекта на гит
++| | 
++| * commit 8c3abd6785a3afe3cfbffa2117d59dfb3e403c21
++|   Author: Александр <pi4yshkin@gmail.com>
++|   Date:   Sat Mar 21 16:35:24 2026 +0300
++|   
++|       Initial commit
++| 
++* commit ffd9384e4f808f935c25daefd37bccbc664f3dd0
++| Author: Alex Pi4yshkin <spk60150@gmail.com>
++| Date:   Mon Mar 23 10:35:37 2026 +0300
++| 
++|     Удаление ошибочно добавленного SFMShop
++| 
++* commit eeed3b188c46d1032a04f76736c33e8a31f41bbc
++  Author: Alex Pi4yshkin <spk60150@gmail.com>
++  Date:   Sat Mar 21 16:36:35 2026 +0300
++  
++      Инициализация проекта
+diff --git a/git_show_example.txt b/git_show_example.txt
+deleted file mode 100644
+index 34944a3..0000000
+--- a/git_show_example.txt
++++ /dev/null
+@@ -1,15 +0,0 @@
+-commit 21dc8a60b78fa49e0d031a1b838cd1a326f92312
+-Author: Alex Pi4yshkin <spk60150@gmail.com>
+-Date:   Tue Mar 24 14:18:47 2026 +0300
+-
+-    Добавлена система логирования
+-
+-diff --git a/src/utils/logger.py b/src/utils/logger.py
+-new file mode 100644
+-index 0000000..a3438d7
+---- /dev/null
+-+++ b/src/utils/logger.py
+-@@ -0,0 +1,2 @@
+-+class Logger:
+-+    pass
+-\ No newline at end of file
+diff --git a/git_statistic.txt b/git_statistic.txt
+new file mode 100644
+index 0000000..490e71e
+--- /dev/null
++++ b/git_statistic.txt
+@@ -0,0 +1,128 @@
++commit fc43a6f3a8e2ed17407afd1a558a5fbf91846112
++Merge: 1d30e4b 816b1ad
++Author: Alex Pi4yshkin <spk60150@gmail.com>
++Date:   Mon Mar 23 21:14:42 2026 +0300
++
++    Разрешен конфликт в класса Product, осталены оба метода calculate_shipping и get_category
++
++commit 816b1ad68276139cd59fe07d0a26eeeceb1648a3
++Author: Alex Pi4yshkin <spk60150@gmail.com>
++Date:   Mon Mar 23 21:09:50 2026 +0300
++
++    Добавлен метод get_category в класс Product
++
++ src/models/product.py | 5 ++++-
++ 1 file changed, 4 insertions(+), 1 deletion(-)
++
++commit 1d30e4b9a4a667d7f91341b575e1334fd7aa62c9
++Author: Alex Pi4yshkin <spk60150@gmail.com>
++Date:   Mon Mar 23 21:07:04 2026 +0300
++
++    Добавлен метод calculate_shipping в класс Product
++
++ src/models/product.py | 7 ++++++-
++ 1 file changed, 6 insertions(+), 1 deletion(-)
++
++commit 2eedde90f0b98fc468ed815148bc6d207b9dc413
++Merge: ea63214 e9f9da3
++Author: Alex Pi4yshkin <spk60150@gmail.com>
++Date:   Mon Mar 23 20:58:58 2026 +0300
++
++    Разрешен конфликт в get_total_price
++
++commit ea63214066e39de5f9af5c204c746513b7dcf121
++Author: Alex Pi4yshkin <spk60150@gmail.com>
++Date:   Mon Mar 23 20:54:40 2026 +0300
++
++    Добавлен коментарий в класс Product метод get_total price
++
++ src/models/product.py | 1 +
++ 1 file changed, 1 insertion(+)
++
++commit e9f9da39d0f432245856feb345019ccc5cbeb4a4
++Author: Alex Pi4yshkin <spk60150@gmail.com>
++Date:   Mon Mar 23 20:53:12 2026 +0300
++
++    Добавлен коммент в класс Product метод get_total_price
++
++ src/models/product.py | 1 +
++ 1 file changed, 1 insertion(+)
++
++commit 6e93d3d4a3e178671678109002667d9ecb1f4b88
++Author: Alex Pi4yshkin <spk60150@gmail.com>
++Date:   Mon Mar 23 11:26:12 2026 +0300
++
++    Добавлены методы управления складом в класс Product
++
++ src/models/product.py | 8 +++++++-
++ 1 file changed, 7 insertions(+), 1 deletion(-)
++
++commit 492b70b19c39b4baad9b58bb558efc709f465892
++Author: Alex Pi4yshkin <spk60150@gmail.com>
++Date:   Mon Mar 23 11:17:31 2026 +0300
++
++    Добавлены методы управления складов в класс Product
++
++ .DS_Store     | Bin 6148 -> 8196 bytes
++ src/.DS_Store | Bin 6148 -> 6148 bytes
++ 2 files changed, 0 insertions(+), 0 deletions(-)
++
++commit aad52b2358849b7b33c66535db4c6b5fa84c93a4
++Merge: ffd9384 8c3abd6
++Author: Alex Pi4yshkin <spk60150@gmail.com>
++Date:   Mon Mar 23 10:40:09 2026 +0300
++
++    заливка проекта на гит
++
++commit ffd9384e4f808f935c25daefd37bccbc664f3dd0
++Author: Alex Pi4yshkin <spk60150@gmail.com>
++Date:   Mon Mar 23 10:35:37 2026 +0300
++
++    Удаление ошибочно добавленного SFMShop
++
++ SFMShop | 1 +
++ 1 file changed, 1 insertion(+)
++
++commit eeed3b188c46d1032a04f76736c33e8a31f41bbc
++Author: Alex Pi4yshkin <spk60150@gmail.com>
++Date:   Sat Mar 21 16:36:35 2026 +0300
++
++    Инициализация проекта
++
++ .DS_Store                                          | Bin 0 -> 6148 bytes
++ .idea/workspace.xml                                | 212 +++++++++++++++++++++
++ main.py                                            |  16 ++
++ src/.DS_Store                                      | Bin 0 -> 6148 bytes
++ src/models/__init__.py                             |   0
++ src/models/__pycache__/__init__.cpython-314.pyc    | Bin 0 -> 165 bytes
++ .../__pycache__/add_discount.cpython-314.pyc       | Bin 0 -> 1388 bytes
++ src/models/__pycache__/exceptions.cpython-314.pyc  | Bin 0 -> 944 bytes
++ src/models/__pycache__/order.cpython-314.pyc       | Bin 0 -> 2216 bytes
++ src/models/__pycache__/payment.cpython-314.pyc     | Bin 0 -> 2270 bytes
++ src/models/__pycache__/product.cpython-314.pyc     | Bin 0 -> 2427 bytes
++ src/models/__pycache__/user.cpython-314.pyc        | Bin 0 -> 1237 bytes
++ src/models/add_discount.py                         |  19 ++
++ src/models/exceptions.py                           |  11 ++
++ src/models/order.py                                |  28 +++
++ src/models/payment.py                              |  22 +++
++ src/models/product.py                              |  34 ++++
++ src/models/user.py                                 |  18 ++
++ src/utils/__init__.py                              |   0
++ src/utils/__pycache__/__init__.cpython-314.pyc     | Bin 0 -> 164 bytes
++ src/utils/__pycache__/calculations.cpython-314.pyc | Bin 0 -> 685 bytes
++ .../__pycache__/order_processor.cpython-314.pyc    | Bin 0 -> 3718 bytes
++ src/utils/__pycache__/validators.cpython-314.pyc   | Bin 0 -> 488 bytes
++ src/utils/calculations.py                          |   9 +
++ src/utils/order_processor.py                       |  81 ++++++++
++ src/utils/validators.py                            |   6 +
++ 26 files changed, 456 insertions(+)
++
++commit 8c3abd6785a3afe3cfbffa2117d59dfb3e403c21
++Author: Александр <pi4yshkin@gmail.com>
++Date:   Sat Mar 21 16:35:24 2026 +0300
++
++    Initial commit
++
++ .gitignore | 207 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
++ README.md  |   1 +
++ 2 files changed, 208 insertions(+)
+diff --git a/src/.DS_Store b/src/.DS_Store
+index 3412848..1ac4296 100644
+Binary files a/src/.DS_Store and b/src/.DS_Store differ
+diff --git a/src/models/product.py b/src/models/product.py
+index e12f0a8..005b763 100644
+--- a/src/models/product.py
++++ b/src/models/product.py
+@@ -31,12 +31,7 @@ class Product:
+ 
+ 
+     def get_total_price(self):
+-      return self.price * self.quantity
+-
+-    def calculate_shipping(self):
+-        pass
+-
+-
++        return self.price * self.quantity
+ 
+     def get_category(self):
+         pass
+\ No newline at end of file
+diff --git a/src/utils/cashing.py b/src/utils/cashing.py
+new file mode 100644
+index 0000000..cd87afa
+--- /dev/null
++++ b/src/utils/cashing.py
+@@ -0,0 +1,2 @@
++class Cashing:
++    pass
+diff --git a/src/utils/logger.py b/src/utils/logger.py
+deleted file mode 100644
+index a3438d7..0000000
+--- a/src/utils/logger.py
++++ /dev/null
+@@ -1,2 +0,0 @@
+-class Logger:
+-    pass
+\ No newline at end of file
