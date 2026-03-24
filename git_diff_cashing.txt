@@ -1,0 +1,8 @@
+diff --git a/src/utils/cashing.py b/src/utils/cashing.py
+new file mode 100644
+index 0000000..cd87afa
+--- /dev/null
++++ b/src/utils/cashing.py
+@@ -0,0 +1,2 @@
++class Cashing:
++    pass

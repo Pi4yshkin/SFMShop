@@ -1,0 +1,7 @@
+  feature/add-inventory-manager
+* feature/add-shipping
+  main
+  remotes/origin/HEAD -> origin/main
+  remotes/origin/feature/add-inventory-manager
+  remotes/origin/feature/add-shipping
+  remotes/origin/main
