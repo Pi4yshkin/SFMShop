@@ -1,0 +1,15 @@
+commit 21dc8a60b78fa49e0d031a1b838cd1a326f92312
+Author: Alex Pi4yshkin <spk60150@gmail.com>
+Date:   Tue Mar 24 14:18:47 2026 +0300
+
+    Добавлена система логирования
+
+diff --git a/src/utils/logger.py b/src/utils/logger.py
+new file mode 100644
+index 0000000..a3438d7
+--- /dev/null
++++ b/src/utils/logger.py
+@@ -0,0 +1,2 @@
++class Logger:
++    pass
+\ No newline at end of file
