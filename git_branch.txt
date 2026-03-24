@@ -1,0 +1,11 @@
+  feature/add-cashing
+  feature/add-inventory-manager
+  feature/add-logging
+  feature/add-shipping
+* main
+  remotes/origin/HEAD -> origin/main
+  remotes/origin/feature/add-cashing
+  remotes/origin/feature/add-inventory-manager
+  remotes/origin/feature/add-logging
+  remotes/origin/feature/add-shipping
+  remotes/origin/main
