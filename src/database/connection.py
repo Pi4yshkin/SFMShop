@@ -11,7 +11,7 @@ def connect_to_db(host, database, user, password):
 def add_product(conn, name, price, quantity):
     with conn.cursor() as cursor:
         cursor.execute("INSERT INTO products (name, price, quantity) VALUES (%s, %s, %s)", (name, price, quantity))
-
+        print(f"Товар добавлен: {name}, {price}, {quantity}")
         conn.commit()
 
 def get_products(conn):
@@ -25,5 +25,6 @@ def get_products(conn):
 def update_product_price(conn, product_id, new_price):
     with conn.cursor() as cursor:
         cursor.execute("UPDATE products SET price = %s WHERE id = %s", (new_price, product_id))
+        print(f"Цена обновлена: {new_price}")
         conn.commit()
 
