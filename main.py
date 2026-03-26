@@ -1,16 +1,15 @@
-from src.models.add_discount import DiscountRate
-from src.models.exceptions import ValidationError
-from src.models.product import Product
+from src.database.connection import connect_to_db
+from src.database.connection import add_product
+from src.database.connection import get_products
+from src.database.connection import update_product_price
 
 
-try:
-    product = Product("Ноутбук", 50_000, 2)
+conn = connect_to_db("localhost", "sfmshop", "postgres", "DiggerLLP199222")
+
+add_product(conn, "Клавиатура", 3000, 34)
+
+products = get_products(conn)
+for product in products:
     print(product)
-except ValidationError as e:
-    print(f"Ошибка: {e}")
 
-try:
-    discount = DiscountRate()
-    print(discount.get_discount(product))
-except ValidationError as e:
-    print(f"Ошибка: {e}")
+update_product_price(conn, 1, 50_000)
