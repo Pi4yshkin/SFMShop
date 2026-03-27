@@ -9,3 +9,7 @@ class ValidationError(SFMShopException):
 class BusinessLogicError(SFMShopException):
     """Ошибка бизнес-логики"""
     pass
+
+class GetInfoError(SFMShopException):
+    """Ошибка получения информации"""
+    pass

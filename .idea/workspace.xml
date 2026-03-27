@@ -8,6 +8,7 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/database/connection.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/database/connection.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/models/exceptions.py" beforeDir="false" afterPath="$PROJECT_DIR$/src/models/exceptions.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,6 +55,7 @@
     "ModuleVcsDetector.initialDetectionPerformed": "true",
     "Python.123.executor": "Run",
     "Python.calculations.executor": "Run",
+    "Python.connection.executor": "Run",
     "Python.main.executor": "Run",
     "Python.order.executor": "Run",
     "Python.order_processor.executor": "Run",
