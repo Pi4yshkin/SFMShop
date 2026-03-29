@@ -78,3 +78,14 @@ def get_user_orders(conn, user_id):
         conn.rollback()
         raise Exception(f"Пользователя с id {user_id} не существует")
 
+
+def add_order_in_order_items(conn, order_id, product_id, quantity):
+    with conn.cursor() as cursor:
+        try:
+            cursor.execute("INSERT INTO order_items (order_id, product_id, quantity) VALUES (%s, %s, %s)",
+                           (order_id, product_id, quantity))
+            conn.commit()
+        except errors.ForeignKeyViolation:
+            conn.rollback()
+            raise Exception(f"Заказ не найден!")
+
