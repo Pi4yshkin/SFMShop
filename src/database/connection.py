@@ -1,13 +1,18 @@
 import psycopg2
-from psycopg2 import errors
+from psycopg2 import errors, OperationalError
 
 
 def connect_to_db(host, database, user, password):
-    with psycopg2.connect(host=host,
-                          database=database,
-                          user=user,
-                          password=password) as conn:
+    try:
+        conn = psycopg2.connect(host=host,
+                              database=database,
+                              user=user,
+                              password=password)
         return conn
+    except OperationalError as e:
+        print(f"Ошибка подключения к БД: {e}")
+        raise
+
 
 
 def add_product(conn, name, price, quantity):
@@ -16,13 +21,11 @@ def add_product(conn, name, price, quantity):
         print(f"Товар добавлен: {name}, {price}, {quantity}")
         conn.commit()
 
-
 def get_products(conn):
     with conn.cursor() as cursor:
         cursor.execute("SELECT * FROM products")
 
         products = cursor.fetchall()
-
         return products
 
 
@@ -40,6 +43,7 @@ def create_user(conn, name, email):
             conn.commit()
             return f"Пользователь создан: {name}, {email}"
         except psycopg2.errors.UniqueViolation:
+            conn.rollback()
             raise Exception(f"Такой email уже существует!")
 
 
@@ -60,6 +64,7 @@ def create_order(conn, user_id, total):
             conn.commit()
             return f"Заказа создан: user_id={user_id}, total={total}"
         except errors.ForeignKeyViolation:
+            conn.rollback()
             raise Exception(f"Пользователя не существует")
 
 
@@ -70,5 +75,6 @@ def get_user_orders(conn, user_id):
             orders = cursor.fetchall()
             return orders
     else:
+        conn.rollback()
         raise Exception(f"Пользователя с id {user_id} не существует")
 
