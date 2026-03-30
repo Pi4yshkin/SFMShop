@@ -1,7 +1,7 @@
 from sqlite3 import OperationalError
 from src.database.connection import (connect_to_db, get_user_by_id, create_user,
                                      create_order,get_user_orders, add_order_in_order_items)
-from src.database.queries import get_orders_with_products, count_orders
+from src.database.queries import get_orders_with_products, count_orders, sort_orders
 
 
 try:
@@ -50,6 +50,10 @@ try:
 
         orders = count_orders(conn)
         print(orders)
+
+        sorted_orders = sort_orders(conn)
+        for order in sorted_orders:
+            print(*order)
 
     conn.close()
 except OperationalError as e:

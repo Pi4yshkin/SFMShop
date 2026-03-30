@@ -25,6 +25,13 @@ def count_orders(conn):
         return count_orders
 
 
-
+def sort_orders(conn):
+    with conn.cursor() as cursor:
+        cursor.execute("SELECT users.name, orders.total, orders.created_at "
+                       "FROM users "
+                       "INNER JOIN orders ON users.id = orders.user_id "
+                       "ORDER BY orders.total DESC ")
+        orders = cursor.fetchall()
+        return orders
 
 
