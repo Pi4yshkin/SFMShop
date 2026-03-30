@@ -1,3 +1,5 @@
+from sqlite3 import DatabaseError
+
 import psycopg2
 from src.database.connection import connect_to_db
 
@@ -37,27 +39,53 @@ from src.database.connection import connect_to_db
 
 def get_user_order_history(conn, user_id):
     with conn.cursor() as cursor:
-        cursor.execute("SELECT users.name, products.name, orders.total, orders.created_at "
-                       "FROM orders "
-                       "INNER JOIN users ON orders.user_id = users.id "
-                       "INNER JOIN order_items ON orders.id = order_items.order_id "
-                       "INNER JOIN products ON order_items.product_id = products.id "
-                       "WHERE users.id = %s "
-                       "ORDER BY orders.created_at DESC ", (user_id,))
+        try:
+            cursor.execute("SELECT users.name, products.name, orders.total, orders.created_at "
+                           "FROM orders "
+                           "INNER JOIN users ON orders.user_id = users.id "
+                           "INNER JOIN order_items ON orders.id = order_items.order_id "
+                           "INNER JOIN products ON order_items.product_id = products.id "
+                           "WHERE users.id = %s "
+                           "ORDER BY orders.created_at DESC ", (user_id,))
 
-        user_order_history = cursor.fetchall()
-        return user_order_history
+            user_order_history = cursor.fetchall()
+            return user_order_history
+
+        except DatabaseError as e:
+            conn.rollback()
+            raise
 
 
 def get_order_statistics(conn):
     with conn.cursor() as cursor:
-        cursor.execute("SELECT users.name, COUNT(orders.id), SUM(orders.total) "
-                       "FROM orders "
-                       "INNER JOIN users ON orders.user_id = users.id "
-                       "GROUP BY users.name ")
+        try:
+            cursor.execute("SELECT users.name, COUNT(orders.id), SUM(orders.total) "
+                           "FROM orders "
+                           "INNER JOIN users ON orders.user_id = users.id "
+                           "GROUP BY users.name ")
 
-        order_statistics = cursor.fetchall()
-        return order_statistics
+            order_statistics = cursor.fetchall()
+            return order_statistics
+
+        except DatabaseError:
+            conn.rollback()
+            raise
 
 
+def get_top_products(conn, limit=5):
+    with conn.cursor() as cursor:
+        try:
+            cursor.execute("SELECT products.name, COUNT(order_items.quantity), SUM(orders.total) "
+                           "FROM products "
+                           "INNER JOIN order_items ON products.id = order_items.product_id "
+                           "INNER JOIN orders ON order_items.order_id = orders.id "
+                           "GROUP BY products.name "
+                           "ORDER BY COUNT(order_items.quantity) DESC "
+                           "LIMIT %s ", (limit,))
 
+            products = cursor.fetchall()
+            return products
+
+        except DatabaseError:
+            conn.rollback()
+            raise

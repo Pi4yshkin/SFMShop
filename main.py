@@ -1,7 +1,7 @@
 from sqlite3 import OperationalError
 from src.database.connection import (connect_to_db, get_user_by_id, create_user,
                                      create_order,get_user_orders, add_order_in_order_items)
-from src.database.queries import get_user_order_history, get_order_statistics
+from src.database.queries import get_user_order_history, get_order_statistics, get_top_products
 
 
 try:
@@ -55,15 +55,26 @@ try:
         # for order in sorted_orders:
         #     print(*order)
 
-        orders_history = get_user_order_history(conn, 69)
-        for order in orders_history:
-            print(*order)
+        try:
+            orders_history = get_user_order_history(conn, 63)
+            for order in orders_history:
+                print(*order)
+        except Exception as e:
+            print(f"Ошибка: {e}")
 
-        orders_statistics = get_order_statistics(conn)
-        for order in orders_statistics:
-            print(*order)
+        try:
+            orders_statistics = get_order_statistics(conn)
+            for order in orders_statistics:
+                print(*order)
+        except Exception as e:
+            print(f"Ошибка: {e}")
 
-
+        try:
+            top_products = get_top_products(conn, )
+            for product in top_products:
+                print(*product)
+        except Exception as e:
+            print(f"Ошибка: {e}")
 
     conn.close()
 except OperationalError as e:
