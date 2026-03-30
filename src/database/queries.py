@@ -49,3 +49,15 @@ def get_user_order_history(conn, user_id):
         return user_order_history
 
 
+def get_order_statistics(conn):
+    with conn.cursor() as cursor:
+        cursor.execute("SELECT users.name, COUNT(orders.id), SUM(orders.total) "
+                       "FROM orders "
+                       "INNER JOIN users ON orders.user_id = users.id "
+                       "GROUP BY users.name ")
+
+        order_statistics = cursor.fetchall()
+        return order_statistics
+
+
+
