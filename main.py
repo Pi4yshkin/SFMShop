@@ -1,7 +1,7 @@
 from sqlite3 import OperationalError
 from src.database.connection import (connect_to_db, get_user_by_id, create_user,
                                      create_order,get_user_orders, add_order_in_order_items)
-from src.database.queries import get_orders_with_products, count_orders, sort_orders
+from src.database.queries import get_user_order_history
 
 
 try:
@@ -48,11 +48,15 @@ try:
         # for order in orders:
         #     print(*order)
 
-        orders = count_orders(conn)
-        print(orders)
+        # orders = count_orders(conn)
+        # print(orders)
+        #
+        # sorted_orders = sort_orders(conn)
+        # for order in sorted_orders:
+        #     print(*order)
 
-        sorted_orders = sort_orders(conn)
-        for order in sorted_orders:
+        orders_history = get_user_order_history(conn, 69)
+        for order in orders_history:
             print(*order)
 
     conn.close()
