@@ -1,16 +1,82 @@
-from src.models.add_discount import DiscountRate
-from src.models.exceptions import ValidationError
-from src.models.product import Product
+from sqlite3 import OperationalError
+from src.database.connection import (connect_to_db, get_user_by_id, create_user,
+                                     create_order,get_user_orders, add_order_in_order_items)
+from src.database.queries import get_user_order_history, get_order_statistics, get_top_products
 
 
 try:
-    product = Product("Ноутбук", 50_000, 2)
-    print(product)
-except ValidationError as e:
+    conn = connect_to_db("localhost", "sfmshop", "postgres", "DiggerLLP199222")
+
+
+    if conn:
+        # try:
+        #     user = create_user(conn, "Maria", "maria@test.com")
+        #     print(user)
+        # except Exception as e:
+        #     print(f"Ошибка добавления пользователя: {e}")
+        #
+        #
+        # user = get_user_by_id(conn, 63)
+        # print(f"Пользователь найден: {user}")
+        #
+        #
+        # try:
+        #     order = create_order(conn, 63, 100_000)
+        #     print(order)
+        # except Exception as e:
+        #     print(f"Ошибка: {e}")
+        #
+        #
+        # try:
+        #     user_orders = get_user_orders(conn, 63)
+        #     print("Заказы пользователя: ", end="")
+        #     for order in user_orders:
+        #         print(*order)
+        # except Exception as e:
+        #     print(f"Ошибка: {e}")
+
+        # orders = get_orders_with_products(conn, 63)
+        # print(orders)
+
+        # try:
+        #     add_order_in_order_items(conn, 67, 10, 1)
+        # except Exception as e:
+        #     print(f"Ошибка: {e}")
+
+
+        # orders = get_orders_with_products(conn, 63)
+        # for order in orders:
+        #     print(*order)
+
+        # orders = count_orders(conn)
+        # print(orders)
+        #
+        # sorted_orders = sort_orders(conn)
+        # for order in sorted_orders:
+        #     print(*order)
+
+        try:
+            orders_history = get_user_order_history(conn, 63)
+            for order in orders_history:
+                print(*order)
+        except Exception as e:
+            print(f"Ошибка: {e}")
+
+        try:
+            orders_statistics = get_order_statistics(conn)
+            for order in orders_statistics:
+                print(*order)
+        except Exception as e:
+            print(f"Ошибка: {e}")
+
+        try:
+            top_products = get_top_products(conn, )
+            for product in top_products:
+                print(*product)
+        except Exception as e:
+            print(f"Ошибка: {e}")
+
+    conn.close()
+except OperationalError as e:
     print(f"Ошибка: {e}")
 
-try:
-    discount = DiscountRate()
-    print(discount.get_discount(product))
-except ValidationError as e:
-    print(f"Ошибка: {e}")
