@@ -1,6 +1,5 @@
-from sqlite3 import DatabaseError
-
 import psycopg2
+from sqlite3 import DatabaseError
 from src.database.connection import connect_to_db
 
 
@@ -40,7 +39,7 @@ from src.database.connection import connect_to_db
 def get_user_order_history(conn, user_id):
     with conn.cursor() as cursor:
         try:
-            cursor.execute("SELECT users.name, products.name, orders.total, orders.created_at "
+            cursor.execute("SELECT users.name, products.name, products.price, order_items.quantity, orders.total, orders.created_at "
                            "FROM orders "
                            "INNER JOIN users ON orders.user_id = users.id "
                            "INNER JOIN order_items ON orders.id = order_items.order_id "
@@ -49,9 +48,11 @@ def get_user_order_history(conn, user_id):
                            "ORDER BY orders.created_at DESC ", (user_id,))
 
             user_order_history = cursor.fetchall()
+            if not user_order_history:
+                raise Exception(f"Пользователя с id {user_id} не существует или у него нет заказов!")
             return user_order_history
-
-        except DatabaseError as e:
+            
+        except DatabaseError:
             conn.rollback()
             raise
 
@@ -60,8 +61,8 @@ def get_order_statistics(conn):
     with conn.cursor() as cursor:
         try:
             cursor.execute("SELECT users.name, COUNT(orders.id), SUM(orders.total) "
-                           "FROM orders "
-                           "INNER JOIN users ON orders.user_id = users.id "
+                           "FROM users "
+                           "LEFT JOIN orders ON users.id = orders.user_id "
                            "GROUP BY users.name ")
 
             order_statistics = cursor.fetchall()
@@ -75,12 +76,11 @@ def get_order_statistics(conn):
 def get_top_products(conn, limit=5):
     with conn.cursor() as cursor:
         try:
-            cursor.execute("SELECT products.name, COUNT(order_items.quantity), SUM(orders.total) "
+            cursor.execute("SELECT products.name, SUM(order_items.quantity) "
                            "FROM products "
                            "INNER JOIN order_items ON products.id = order_items.product_id "
-                           "INNER JOIN orders ON order_items.order_id = orders.id "
                            "GROUP BY products.name "
-                           "ORDER BY COUNT(order_items.quantity) DESC "
+                           "ORDER BY SUM(order_items.quantity) DESC "
                            "LIMIT %s ", (limit,))
 
             products = cursor.fetchall()
