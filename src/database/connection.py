@@ -21,12 +21,16 @@ def add_product(conn, name, price, quantity):
         print(f"Товар добавлен: {name}, {price}, {quantity}")
         conn.commit()
 
-def get_products(conn):
+def get_all_products(conn):
     with conn.cursor() as cursor:
-        cursor.execute("SELECT * FROM products")
+        try:
+            cursor.execute("SELECT * FROM products")
 
-        products = cursor.fetchall()
-        return products
+            products = cursor.fetchall()
+            return products
+
+        except Exception as e:
+            print(f"Ошибка получения товаров: {e}")
 
 
 def update_product_price(conn, product_id, new_price):
@@ -34,6 +38,17 @@ def update_product_price(conn, product_id, new_price):
         cursor.execute("UPDATE products SET price = %s WHERE id = %s", (new_price, product_id))
         print(f"Цена обновлена: {new_price}")
         conn.commit()
+
+def add_product_in_stock(conn, name, price, quantity):
+    with conn.cursor() as cursor:
+        try:
+            cursor.execute("INSERT INTO products (name, price,quantity) VALUES (%s, %s, %s)", (name, price, quantity))
+            conn.commit()
+            return f"Товар добавлен: {name}, {price}, {quantity}"
+
+        except psycopg2.errors.DatabaseError as e:
+            conn.rollback()
+            print(f"Ошибка добавления товара: {e}")
 
 
 def create_user(conn, name, email):
@@ -49,11 +64,13 @@ def create_user(conn, name, email):
 
 def get_user_by_id(conn, user_id):
     with conn.cursor() as cursor:
-        cursor.execute("SELECT * FROM users WHERE id = %s", (user_id, ))
-        user = cursor.fetchone()
-        if user:
-            return dict(id=user[0], name=user[1], email=user[2])
-        else:
+        try:
+            cursor.execute("SELECT id, name, email FROM users WHERE id = %s", (user_id, ))
+            user = cursor.fetchone()
+            return f"Пользователь найден: {dict(id=user[0], name=user[1], email=user[2])}"
+        
+        except TypeError as e:
+            conn.rollback()
             return None
 
 
@@ -89,3 +106,19 @@ def add_order_in_order_items(conn, order_id, product_id, quantity):
             conn.rollback()
             raise Exception(f"Заказ не найден!")
 
+def delete_order(conn, order_id):
+    with conn.cursor() as cursor:
+        try:
+            cursor.execute("SELECT COUNT(*) FROM orders WHERE id = %s", (order_id, ))
+            cnt_1 = cursor.fetchone()[0]
+            cursor.execute("DELETE FROM order_items WHERE order_id = %s ", (order_id, ))
+            cursor.execute("DELETE FROM orders WHERE id = %s", (order_id, ))
+            cursor.execute("SELECT COUNT(*) FROM orders WHERE id = %s", (order_id, ))
+            cnt_2 = cursor.fetchone()[0]
+            res_cnt = cnt_1 - cnt_2
+            conn.commit()
+            return f"Количество записей удалено: {res_cnt}"
+        except TypeError:
+            conn.rollback()
+            raise Exception(f"Заказ не найден!")
+        

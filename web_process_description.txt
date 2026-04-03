@@ -1,0 +1,38 @@
+Пользователь вводит URL
+
+DNS запрашивает IP для URL (10 - 50 мс) DNS -> Domain Name System
+Возможные проблемы:
+- DNS сервер не отвечает 
+
+Устанавливается TCP соединение (50 - 200 мс)  TCP -> Transmission Control Protocol
+Возможные проблемы:
+- Сервер недоступен 
+
+HTTP запрос:
+    GET /products HTTP/1.1  (GET - получить, /products - откуда, HTTP/1.1 - версия протокола)
+    Host: sfmshop.com
+    User-Agent: Mozilla/5.0...
+Возможные проблемы:
+- Сервер или БД недоступны
+
+Обработка на сервере (100 - 500 мс):
+    # На сервере (FastAPI)
+    @app.get("/products")
+    def get_products():
+        # Получить товары из БД
+        products = get_all_products(conn)
+        return products
+
+HTTP ответ:
+HTTP/1.1 200 OK
+Content-Type: application/json
+Возможные проблемы:
+- Большой размер файла
+
+Обработка и отображение ответа на клиенте (50 - 200 мс):
+[
+  {"id": 1, "name": "Ноутбук", "price": 50000},
+  {"id": 2, "name": "Мышь", "price": 1500}
+]
+
+Общее время выполнения: ~210-950 мс (0.2-1 секунда)
