@@ -11,7 +11,7 @@ def main():
 
         if conn:
             try:
-                user = create_user(conn, "Alena", "alena@test.com")
+                user = create_user(conn, "Nikita", "nikita@test.com")
                 print(user)
             except Exception as e:
                 print(f"Ошибка добавления пользователя: {e}")
