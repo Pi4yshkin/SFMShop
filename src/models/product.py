@@ -1,5 +1,5 @@
 from src.models.exceptions import ValidationError
-# from src.models.add_discount import DiscountRate
+from src.database.connection import connect_to_db
 
 
 class Product:
@@ -17,6 +17,17 @@ class Product:
             raise ValidationError(f"Цена не может быть отрицательной")
         self.price = price
 
+    def get_all_products(conn):  # Вызываю функцию и передаю подключение к БД
+        try:
+            with conn.cursor() as cursor:
+                cursor.execute("SELECT * FROM products")  # Выполняю SQL-запрос для получения всех товаров из таблицы products
+                products = cursor.fetchall()  # Получаю все результаты запроса и сохраняю их в переменную products
+                return products  
+            conn.close()  # Закрываю подключение к БД после выполнения запроса
+        except Exception as e:  
+            raise ValidationError(f"Ошибка при получении товаров: {str(e)}")  
+
+
     def __str__(self):
         return f"Товар: {self.name}, Цена: {self.price}, Количество: {self.quantity}"
 
@@ -32,6 +43,7 @@ class Product:
 
     def get_total_price(self):
       return self.price * self.quantity
+
 
     def calculate_shipping(self):
         pass

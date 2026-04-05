@@ -2,16 +2,24 @@ from fastapi import FastAPI, Depends, HTTPException
 from pydantic import BaseModel, EmailStr
 from src.database.connection import connect_to_db
 import psycopg2
+from src.models.product import Product
 
 
 app = FastAPI()
 @app.get("/products")
-def get_products(limit: int=10, offset: int=0, conn = Depends(connect_to_db)):
+def get_products(limit: int=10, offset: int=0, conn = Depends(connect_to_db)):  # limit - кол-во товаров на странице, offset - с какого товара начинать
     with conn.cursor() as cursor:
-        cursor.execute("SELECT * FROM products")
-        products = cursor.fetchall()
-        
-    return products
+        try:
+            all_products = Product.get_all_products(conn)  # Получаем все товары из базы данных через метод класса Product
+            total = len(all_products)  # Общее количество товаров
+            products = all_products[offset:offset+limit]  # Получаем товары для текущей страницы
+            return {"total": total,
+                    "limit": limit,
+                    "offset": offset,
+                    "products": products}
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+    
 
 
 @app.get("/products/{id}")
