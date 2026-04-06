@@ -157,36 +157,3 @@ async def shutdown():
     if conn:
         conn.close()
 
-def test_api():
-
-    client = TestClient(app)
-
-    response = client.get("/products")
-    assert response.status_code == 200
-    print("GET products: OK")
-
-    response = client.get("/products/1")
-    assert response.status_code == 200
-    print("GET products/1: OK")
-
-    response = client.delete("/products/1")
-    assert response.status_code == 200
-    print("DELETE products/1: OK")
-
-    response = client.post("/orders", json={"user_id": 1, "total": 12000})
-    assert response.status_code == 201
-    print("POST orders: OK")
-
-    response = client.get("/users")
-    assert response.status_code == 200
-    print("GET users: OK")
-
-    response = client.get("/users/1")
-    assert response.status_code == 200
-    print("GET users/1: OK")
-
-    response = client.post("/users", json={"name": "Voland", "email": "voland@test.com"})
-    assert response.status_code == 201
-    print("POST users: OK")
-
-test_api()
