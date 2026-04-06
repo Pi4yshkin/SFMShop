@@ -1,5 +1,6 @@
 import psycopg2
 from psycopg2 import errors, OperationalError
+from fastapi import HTTPException
 
 
 def connect_to_db(host, database, user, password):
@@ -21,34 +22,52 @@ def add_product(conn, name, price, quantity):
         print(f"Товар добавлен: {name}, {price}, {quantity}")
         conn.commit()
 
+
 def get_all_products(conn):
     with conn.cursor() as cursor:
         try:
             cursor.execute("SELECT * FROM products")
-
             products = cursor.fetchall()
             return products
 
         except Exception as e:
-            print(f"Ошибка получения товаров: {e}")
+            raise HTTPException(status_code=500, detail=str(e))
 
 
-def update_product_price(conn, product_id, new_price):
-    with conn.cursor() as cursor:
-        cursor.execute("UPDATE products SET price = %s WHERE id = %s", (new_price, product_id))
-        print(f"Цена обновлена: {new_price}")
-        conn.commit()
+# def update_product_price(conn, product_id, new_price):
+#     try:
+#         with conn.cursor() as cursor:
+#             cursor.execute("UPDATE products SET price = %s WHERE id = %s", (new_price, product_id))
+#             if cursor.rowcount == 0:
+#                 raise HTTPException(status_code=404, detail="Товар не найден")
+#     except Exception:
+#         raise
+
 
 def add_product_in_stock(conn, name, price, quantity):
-    with conn.cursor() as cursor:
-        try:
+    try:
+        with conn.cursor() as cursor:
             cursor.execute("INSERT INTO products (name, price,quantity) VALUES (%s, %s, %s)", (name, price, quantity))
             conn.commit()
             return f"Товар добавлен: {name}, {price}, {quantity}"
 
-        except psycopg2.errors.DatabaseError as e:
-            conn.rollback()
-            print(f"Ошибка добавления товара: {e}")
+    except psycopg2.errors.DatabaseError as e:
+        conn.rollback()
+        print(f"Ошибка добавления товара: {e}")
+
+
+# def delete_order(conn, product_id):
+#     with conn.cursor() as cursor:
+#         cursor.execute("SELECT * FROM products WHERE id = %s", (product_id,))
+#         product = cursor.fetchone()
+#         if not product:
+#             raise HTTPException(status_code=404, detail="Товар не найден")
+        
+
+    # with conn.cursor() as cursor:
+    #     cursor.execute("DELETE FROM products WHERE id = %s", (product_id,))
+    #     print(cursor.rowcount)
+    #     conn.commit()
 
 
 def create_user(conn, name, email):
@@ -72,6 +91,19 @@ def get_user_by_id(conn, user_id):
         except TypeError as e:
             conn.rollback()
             return None
+        
+
+def get_product_by_id(conn, id):
+    try:
+        with conn.cursor() as cursor:
+            cursor.execute("SELECT * FROM products WHERE id = %s", (id,))  
+            product = cursor.fetchone()
+            if product is None:
+                raise 
+            else:
+                return f"Продукт найден: {dict(id=product[0], name=product[1], price=product[2], quantity=product[3])}"
+    except Exception:
+        raise HTTPException(status_code=404, detail="Товар не найден")
 
 
 def create_order(conn, user_id, total):
@@ -122,3 +154,4 @@ def delete_order(conn, order_id):
             conn.rollback()
             raise Exception(f"Заказ не найден!")
         
+
