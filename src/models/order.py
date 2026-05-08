@@ -1,41 +1,45 @@
-from src.models.exceptions import ValidationError, BusinessLogicError
-from src.models.product import Product
-from src.models.user import User
-from src.database.connection import connect_to_db
-from fastapi import FastAPI, HTTPException
+from src.models.metaclasses import ModelMeta
+from src.models.descriptors import PositiveNumber
+from src.models.mixins import LoggableMixin, SerializableMixin
 
 
-class Order:
-    # def __init__(self, user, products):
-    #     if not isinstance(user, User):
-    #         raise ValidationError("Пользователя не существует")
-    #     self.user = user
-    #     if not products:
-    #         raise BusinessLogicError("Список товаров пуст")
-    #     self.products = list(products)
-    #     self.total = 0
+class Order(LoggableMixin, SerializableMixin, metaclass=ModelMeta):
+    order_id = PositiveNumber("_order_id")
 
-    # def add_product(self, product):
-    #     if not isinstance(product, Product):
-    #         raise ValidationError("Заказ не существует")
-    #     self.products.append(product)
-    #     return self.products
+    def __init__(self, order_id, items, user):
+        self.order_id = order_id
+        self.items = items
+        self.user = user
 
-    def add_order(conn, user_id, total):
-        try:
-            with conn.cursor() as cursor:
-                cursor.execute("INSERT INTO orders (user_id, total) VALUES (%s, %s)", (user_id, total))
-                if cursor.rowcount <= 0:
-                    raise HTTPException(status_code=400, detail="Неверный формат данных")
-                conn.commit()
-        except Exception as e:
-            raise e
+        self.log(f"Заказ создан. ID: {order_id}")
 
-        
-    # def calculate_total(self):
-    #     for product in self.products:
-    #         self.total += product.price * product.quantity
-    #     return self.total
+    def to_json(self):
+        return {
+            "order_id": self.order_id,
+            "items": self.items,
+            "user": self.user
+        }
 
-    # def __str__(self):
-    #     return f"Заказ пользователя {self.user.name} на сумму {self.total} руб."
+
+    def __lt__(self, other):
+        if not isinstance(other, Order):
+            return NotImplemented
+        return self.order_id < other.order_id
+    
+    def __contains__(self, item):
+        return item in self.items
+    
+    def __len__(self):
+        return len(self.items)
+    
+    def __add__(self, other):
+        if not isinstance(other, Order):
+            return NotImplemented
+        new_items = self.items + other.items
+        return Order(self.order_id, new_items, self.user)
+    
+    def __str__(self):
+        return f"{self.user}, id #{self.order_id} с товарами {self.items}"
+    
+    def __repr__(self):
+        return f"Order(user:{self.user}, id:{self.order_id}, товары:{self.items})"
