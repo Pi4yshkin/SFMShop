@@ -1,111 +1,138 @@
-import psycopg2
-from psycopg2 import OperationalError
-from src.database.connection import (connect_to_db, get_user_by_id, create_user, get_all_products,
-                                     create_order,get_user_orders, add_order_in_order_items, add_product_in_stock, delete_order)
-from src.database.queries import get_user_order_history, get_order_statistics, get_top_products
+"""На данный момент структура БД проекта SFMShop выглядит следующим образом:
+sfmshop=# \d
+                     Список отношений
+ Схема  |       Имя       |        Тип         | Владелец 
+--------+-----------------+--------------------+----------
+ public | orders          | таблица            | postgres
+ public | orders_id_seq   | последовательность | postgres
+ public | products        | таблица            | postgres
+ public | products_id_seq | последовательность | postgres
+ public | reviews         | таблица            | postgres
+ public | reviews_id_seq  | последовательность | postgres
+ public | users           | таблица            | postgres
+ public | users_id_seq    | последовательность | postgres
+(8 строк)
 
-def main():
-    try:
-        conn = connect_to_db("localhost", "sfmshop", "postgres", "DiggerLLP199222")
+sfmshop=# \d orders;
+                                                Таблица "public.orders"
+  Столбец   |             Тип             | Правило сортировки | Допустимость NULL |            По умолчанию            
+------------+-----------------------------+--------------------+-------------------+------------------------------------
+ id         | integer                     |                    | not null          | nextval('orders_id_seq'::regclass)
+ user_id    | integer                     |                    |                   | 
+ product_id | integer                     |                    |                   | 
+ total      | numeric(10,2)               |                    | not null          | 
+ created_at | timestamp without time zone |                    |                   | CURRENT_TIMESTAMP
+Индексы:
+    "orders_pkey" PRIMARY KEY, btree (id)
+    "idx_user_id" btree (user_id)
+Ограничения внешнего ключа:
+    "orders_product_id_fkey" FOREIGN KEY (product_id) REFERENCES products(id)
+    "orders_user_id_fkey" FOREIGN KEY (user_id) REFERENCES users(id)
 
+sfmshop=# \d products;
+                                                Таблица "public.products"
+  Столбец   |             Тип             | Правило сортировки | Допустимость NULL |             По умолчанию             
+------------+-----------------------------+--------------------+-------------------+--------------------------------------
+ id         | integer                     |                    | not null          | nextval('products_id_seq'::regclass)
+ name       | character varying(100)      |                    | not null          | 
+ price      | numeric(10,2)               |                    | not null          | 
+ quantity   | integer                     |                    |                   | 0
+ created_at | timestamp without time zone |                    |                   | CURRENT_TIMESTAMP
+Индексы:
+    "products_pkey" PRIMARY KEY, btree (id)
+Ссылки извне:
+    TABLE "orders" CONSTRAINT "orders_product_id_fkey" FOREIGN KEY (product_id) REFERENCES products(id)
+    TABLE "reviews" CONSTRAINT "reviews_product_id_fkey" FOREIGN KEY (product_id) REFERENCES products(id)
 
-        if conn:
-            try:
-                user = create_user(conn, "Nikita", "nikita@test.com")
-                print(user)
-            except Exception as e:
-                print(f"Ошибка добавления пользователя: {e}")
-            
-            
-            try:
-                products = get_all_products(conn)
-                for product in products:
-                    print(*product)
-                print()
-            except Exception as e:
-                print(f"Ошибка: {e}")
-            #
-            try:
-                user = get_user_by_id(conn, 4)
-                print(user)
-                print()
-            except Exception as e:
-                print(f"Ошибка: {e}")
-            #
-            # try:
-            #     add_product = add_product_in_stock(conn, "Светильник", 12_000, 3)
-            #     print(add_product)
-            # except Exception as e:
-            #     print(f"Ошибка: {e}") 
-            #
-            # try:
-            #     order = create_order(conn, 1, 95_000)
-            #     print(order)
-            # except Exception as e:
-            #     print(f"Ошибка: {e}")
-            #
-            #
-            # try:
-            #     user_orders = get_user_orders(conn, 63)
-            #     print("Заказы пользователя: ", end="")
-            #     for order in user_orders:
-            #         print(*order)
-            # except Exception as e:
-            #     print(f"Ошибка: {e}")
+sfmshop=# \d users;
+                                                Таблица "public.users"
+  Столбец   |             Тип             | Правило сортировки | Допустимость NULL |           По умолчанию            
+------------+-----------------------------+--------------------+-------------------+-----------------------------------
+ id         | integer                     |                    | not null          | nextval('users_id_seq'::regclass)
+ name       | character varying(100)      |                    | not null          | 
+ email      | character varying(100)      |                    | not null          | 
+ balance    | numeric(10,2)               |                    | not null          | 0
+ created_at | timestamp without time zone |                    |                   | CURRENT_TIMESTAMP
+Индексы:
+    "users_pkey" PRIMARY KEY, btree (id)
+    "idx_name" btree (name)
+    "users_email_key" UNIQUE CONSTRAINT, btree (email)
+Ссылки извне:
+    TABLE "orders" CONSTRAINT "orders_user_id_fkey" FOREIGN KEY (user_id) REFERENCES users(id)
+    TABLE "reviews" CONSTRAINT "reviews_user_id_fkey" FOREIGN KEY (user_id) REFERENCES users(id)
 
-            # orders = get_orders_with_products(conn, 63)
-            # print(orders)
+sfmshop=# \d reviews;
+                                                 Таблица "public.reviews"
+   Столбец   |             Тип             | Правило сортировки | Допустимость NULL |            По умолчанию             
+-------------+-----------------------------+--------------------+-------------------+-------------------------------------
+ id          | integer                     |                    | not null          | nextval('reviews_id_seq'::regclass)
+ user_id     | integer                     |                    |                   | 
+ product_id  | integer                     |                    |                   | 
+ review_text | text                        |                    |                   | 
+ rating      | integer                     |                    | not null          | 
+ created_at  | timestamp without time zone |                    |                   | CURRENT_TIMESTAMP
+Индексы:
+    "reviews_pkey" PRIMARY KEY, btree (id)
+Ограничения-проверки:
+    "reviews_rating_check" CHECK (rating >= 1 AND rating <= 5)
+Ограничения внешнего ключа:
+    "reviews_product_id_fkey" FOREIGN KEY (product_id) REFERENCES products(id)
+    "reviews_user_id_fkey" FOREIGN KEY (user_id) REFERENCES users(id)
 
-            # try:
-            #     add_order_in_order_items(conn, 4, 2, 1)
-            # except Exception as e:
-            #     print(f"Ошибка: {e}")
+    
+Предложения по денормализации:
+- в таблице orders добавить поля user_name и product_name для отчета
+- в таблице reviews добавить поле product_name
 
+Триггер для user_name таблицы orders:
+CREATE OR REPLACE FUNCTION update_orders_user_name()
+RETURNS TRIGGER AS $$
+BEGIN
+UPDATE orders SET user_name = NEW.name WHERE user_id = NEW.id;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
-            # orders = get_orders_with_products(conn, 63)
-            # for order in orders:
-            #     print(*order)
+CREATE TRIGGER change_orders_user_name
+AFTER UPDATE ON users
+FOR EACH ROW
+WHEN (OLD.name IS DISTINCT FROM NEW.name)
+EXECUTE FUNCTION update_orders_user_name;
 
-            # orders = count_orders(conn)
-            # print(orders)
-            #
-            # sorted_orders = sort_orders(conn)
-            # for order in sorted_orders:
-            #     print(*order)
+Триггер для product_name таблицы orders:
+CREATE OR REPLACE FUNCTION update_orders_product_name()
+RETURNS TRIGGER AS $$
+BEGIN
+UPDATE orders SET product_name = NEW.name WHERE product_id = NEW.id;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
-            try:
-                orders_history = get_user_order_history(conn, 4)
-                for order in orders_history:
-                    print(*order)
-                print()
-            except Exception as e:
-                print(f"Ошибка: {e}")
+CREATE TRIGGER change_product_name
+AFTER UPDATE ON products
+FOR EACH ROW
+WHEN (OLD.name IS DISTINCT FROM NEW.name)
+EXECUTE FUNCTION update_orders_product_name()
 
-            try:
-                orders_statistics = get_order_statistics(conn)
-                for order in orders_statistics:
-                    print(*order)
-                print()
-            except Exception as e:
-                print(f"Ошибка: {e}")
+Триггер для product_name таблицы reviews:
+CREATE OR REPLACE FUNCTION update_reviews_product_name()
+RETURNS TRIGGER AS $$
+BEGIN
+UPDATE reviews SET product_name = NEW.name WHERE product_id = NEW.id;
+RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
 
-            try:
-                top_products = get_top_products(conn)
-                for product in top_products:
-                    print(*product)
-                print()
-            except Exception as e:
-                print(f"Ошибка: {e}")
+CREATE TRIGGER change_product_name
+AFTER UPDATE ON products
+FOR EACH ROW
+WHEN (OLD.name IS DISTINCT FOR NEW.name)
+EXECUTE FUNCTION update_reviews_product_name()
 
+Компромисс: убрать JOIN для получения имени пользователя и названия товара для таблицы orders
 
-            # try:
-            #     res_del = delete_order(conn, 2)
-            #     print(res_del)
-            # except Exception as e:
-            #     print(f"Ошибка: {e}")
+Компромисс: убрать JOIN для получения названия товара при запросе отзывов
 
-        conn.close()
-    except OperationalError as e:
-        print(f"Ошибка: {e}")
-
-main()
+PS триггеры писал по примеру из урока, надеюсь задачи с ними будут в будущем.
+PSS закинул свой анализ для анализа в дипсик, тот наругался. говорит тут ничего не надо денормализовать :D
+"""

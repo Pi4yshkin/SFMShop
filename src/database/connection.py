@@ -1,157 +1,36 @@
-import psycopg2
-from psycopg2 import errors, OperationalError
-from fastapi import HTTPException
+from sqlalchemy import create_engine
+import os
+from dotenv import load_dotenv
+from sqlalchemy.orm import sessionmaker
+from contextlib import contextmanager
 
 
-def connect_to_db(host, database, user, password):
-    try:
-        conn = psycopg2.connect(host=host,
-                              database=database,
-                              user=user,
-                              password=password)
-        return conn
-    except OperationalError as e:
-        print(f"Ошибка подключения к БД: {e}")
-        raise
+load_dotenv()
 
+engine_master = create_engine(f"postgresql://{os.getenv('MASTER_USER')}:{os.getenv('MASTER_PASSWORD', "")}@"
+f"{os.getenv('MASTER_HOST')}:{os.getenv('MASTER_PORT')}/{os.getenv('MASTER_NAME')}")  # URL для мастер
 
+engine_replica = create_engine(f"postgresql://{os.getenv('REPLICA_USER')}:{os.getenv('REPLICA_PASSWORD')}@"
+f"{os.getenv('REPLICA_HOST_REPLICA')}:{os.getenv('REPLICA_PORT')}/{os.getenv('REPLICA_NAME')}")  # URL для реплики
 
-def add_product(conn, name, price, quantity):
-    with conn.cursor() as cursor:
-        cursor.execute("INSERT INTO products (name, price, quantity) VALUES (%s, %s, %s)", (name, price, quantity))
-        print(f"Товар добавлен: {name}, {price}, {quantity}")
-        conn.commit()
+SessionLocalMaster = sessionmaker(bind=engine_master)  # фабрика сессий
+SessionLocalReplica = sessionmaker(bind=engine_replica)  # фабрика сессий
 
-
-def get_all_products(conn):
-    with conn.cursor() as cursor:
-        try:
-            cursor.execute("SELECT * FROM products")
-            products = cursor.fetchall()
-            return products
-
-        except Exception as e:
-            raise HTTPException(status_code=500, detail=str(e))
-
-
-# def update_product_price(conn, product_id, new_price):
-#     try:
-#         with conn.cursor() as cursor:
-#             cursor.execute("UPDATE products SET price = %s WHERE id = %s", (new_price, product_id))
-#             if cursor.rowcount == 0:
-#                 raise HTTPException(status_code=404, detail="Товар не найден")
-#     except Exception:
-#         raise
-
-
-def add_product_in_stock(conn, name, price, quantity):
-    try:
-        with conn.cursor() as cursor:
-            cursor.execute("INSERT INTO products (name, price,quantity) VALUES (%s, %s, %s)", (name, price, quantity))
-            conn.commit()
-            return f"Товар добавлен: {name}, {price}, {quantity}"
-
-    except psycopg2.errors.DatabaseError as e:
-        conn.rollback()
-        print(f"Ошибка добавления товара: {e}")
-
-
-# def delete_order(conn, product_id):
-#     with conn.cursor() as cursor:
-#         cursor.execute("SELECT * FROM products WHERE id = %s", (product_id,))
-#         product = cursor.fetchone()
-#         if not product:
-#             raise HTTPException(status_code=404, detail="Товар не найден")
-        
-
-    # with conn.cursor() as cursor:
-    #     cursor.execute("DELETE FROM products WHERE id = %s", (product_id,))
-    #     print(cursor.rowcount)
-    #     conn.commit()
-
-
-def create_user(conn, name, email):
-    with conn.cursor() as cursor:
-        try:
-            cursor.execute("INSERT INTO users (name, email) VALUES (%s, %s)", (name, email))
-            conn.commit()
-            return f"Пользователь создан: {name}, {email}"
-        except psycopg2.errors.UniqueViolation:
-            conn.rollback()
-            raise Exception(f"Такой email уже существует!")
-
-
-def get_user_by_id(conn, user_id):
-    with conn.cursor() as cursor:
-        try:
-            cursor.execute("SELECT id, name, email FROM users WHERE id = %s", (user_id, ))
-            user = cursor.fetchone()
-            return f"Пользователь найден: {dict(id=user[0], name=user[1], email=user[2])}"
-        
-        except TypeError as e:
-            conn.rollback()
-            return None
-        
-
-def get_product_by_id(conn, id):
-    try:
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT * FROM products WHERE id = %s", (id,))  
-            product = cursor.fetchone()
-            if product is None:
-                raise 
-            else:
-                return f"Продукт найден: {dict(id=product[0], name=product[1], price=product[2], quantity=product[3])}"
-    except Exception:
-        raise HTTPException(status_code=404, detail="Товар не найден")
-
-
-def create_order(conn, user_id, total):
-    with conn.cursor() as cursor:
-        try:
-            cursor.execute("INSERT INTO orders (user_id, total) VALUES (%s, %s)", (user_id, total))
-            conn.commit()
-            return f"Заказа создан: user_id={user_id}, total={total}"
-        except errors.ForeignKeyViolation:
-            conn.rollback()
-            raise Exception(f"Пользователя не существует")
-
-
-def get_user_orders(conn, user_id):
-    if get_user_by_id(conn, user_id):
-        with conn.cursor() as cursor:
-            cursor.execute("SELECT * FROM orders WHERE user_id = %s", (user_id, ))
-            orders = cursor.fetchall()
-            return orders
+@contextmanager
+def get_session(read_only=False):
+    if read_only:
+        print("Читаю из реплики")
+        session = SessionLocalReplica()
     else:
-        conn.rollback()
-        raise Exception(f"Пользователя с id {user_id} не существует")
-
-
-def add_order_in_order_items(conn, order_id, product_id, quantity):
-    with conn.cursor() as cursor:
-        try:
-            cursor.execute("INSERT INTO order_items (order_id, product_id, quantity) VALUES (%s, %s, %s)",
-                           (order_id, product_id, quantity))
-            conn.commit()
-        except errors.ForeignKeyViolation:
-            conn.rollback()
-            raise Exception(f"Заказ не найден!")
-
-def delete_order(conn, order_id):
-    with conn.cursor() as cursor:
-        try:
-            cursor.execute("SELECT COUNT(*) FROM orders WHERE id = %s", (order_id, ))
-            cnt_1 = cursor.fetchone()[0]
-            cursor.execute("DELETE FROM order_items WHERE order_id = %s ", (order_id, ))
-            cursor.execute("DELETE FROM orders WHERE id = %s", (order_id, ))
-            cursor.execute("SELECT COUNT(*) FROM orders WHERE id = %s", (order_id, ))
-            cnt_2 = cursor.fetchone()[0]
-            res_cnt = cnt_1 - cnt_2
-            conn.commit()
-            return f"Количество записей удалено: {res_cnt}"
-        except TypeError:
-            conn.rollback()
-            raise Exception(f"Заказ не найден!")
-        
-
+        print("Запись в master")
+        session = SessionLocalMaster()
+    try:
+        yield session
+        if not read_only:
+            session.commit()
+    except Exception as e:
+        if not read_only:
+            session.rollback()
+            raise
+    finally:
+        session.close()
