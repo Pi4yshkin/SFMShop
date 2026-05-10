@@ -1,7 +1,7 @@
 from sqlalchemy import Integer, String, DateTime, Numeric, ForeignKey
 from sqlalchemy.orm import relationship, DeclarativeBase, Mapped, mapped_column
 from datetime import datetime, timezone
-# from src.database.connection import engine
+from src.database.connection import engine_master
 
 
 class Base(DeclarativeBase):

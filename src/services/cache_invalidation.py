@@ -3,6 +3,6 @@ import redis
 
 redis_client = redis.Redis(host='localhost', port=6379, db=0, decode_responses=True)
 
-def invalidate_cache(cached_key):
+def invalidate_cache(*args):
     print("Удаляю из кеша")
-    redis_client.delete(cached_key)
+    redis_client.delete(args)
