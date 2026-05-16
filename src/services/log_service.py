@@ -1,27 +1,32 @@
 from pymongo import MongoClient
+from pymongo.collection import Collection
 from datetime import datetime
 import os
 from dotenv import load_dotenv
+from typing import Optional
+
 
 load_dotenv()
 
-# подключаемся к БД
-client = MongoClient(
-    host=os.getenv("MONGO_HOST", "localhost"),
-    port=int(os.getenv("MONGO_PORT", 27017))
-)
+class ConnectToMongoDB:
+    def __init__(self):
+        self.client = MongoClient(
+            host=os.getenv("MONGO_HOST", "localhost"),
+            port=int(os.getenv("MONGO_PORT", 27017)))
+        self.db = self.client["sfmshop_logs"]
+        self.logs_collection = self.db["log"]
 
-# выбор БД
-db = client["sfmshop_logs"]
+connection = ConnectToMongoDB()
+logs_collection = connection.logs_collection
 
-# выбор коллекции
-logs_collection = db["log"]
+class AddOneLog:
+    """Класс добавляет один лог"""
+    def __init__(self, logs_collection: Collection):
+        self.logs_collection = logs_collection
 
-
-def insert_one_log(log_data:dict)-> str:
-    """Функция добавления одного лога"""
-    log = logs_collection.insert_one(log_data)
-    return f"лог {log} успешно добавлен"
+    def insert_one_log(self, log_data:dict)-> str:
+        log = self.logs_collection.insert_one(log_data)
+        return f"лог {log} успешно добавлен"
 
 test_one_log = {
         "type": "error",
@@ -31,80 +36,121 @@ test_one_log = {
         "stack_trace": "ConnectionError: timeout"
     }
 
-# print(insert_one_log(test_one_log))
 
-def insert_many_logs(logs_data:list)-> bool:
-    logs_collection.insert_many(logs_data)
-    return True
+class AddManyLogs:
+    """Класс добавляет много логов"""
+    def __init__(self, logs_collection: Collection):
+        self.logs_collection = logs_collection
+
+    def insert_many_logs(self, logs_data:list)-> bool:
+        self.logs_collection.insert_many(logs_data)
+        return True
 
 
-def get_all_logs()-> list:
-    """Функция получения всех логов"""
-    logs = logs_collection.find()
-    return list(logs)
+class GetAllLogs:
+    """Класс получает все логи"""
+    def __init__(self, logs_collection: Collection):
+        self.logs_collection = logs_collection
 
-# all_logs = get_all_logs()
-# for log in all_logs:
+    def get_all_logs(self)-> list:
+        logs = self.logs_collection.find()
+        return list(logs)
+
+# res = GetAllLogs(logs_collection)
+# logs = res.get_all_logs()
+# for log in logs:
 #     print(f"[LOG]: {log}")
 
-def get_log_by_fiel_value(field: str, value: str)->list:
-    """Функция получения логов по ключ: значению, первым аргументов указывается поле, вторым - значение.
-    Функция для задания поиска логов по статус-коду и IP(но это если нам известны оба значения)"""
-    logs = logs_collection.find({str(field): value})
-    return list(logs)
+class GetLogsByFieldValue:
+    """Класс получает логи по ключ: значению"""
+    def __init__(self, logs_collection: Collection):
+        self.logs_collection = logs_collection
 
-# result = get_log_by_fiel_value("type", "access")
-# for log in result:
+    def get_log_by_field_value(self, field: str, value: str)->list:
+        logs = self.logs_collection.find({str(field): value})
+        return list(logs)
+
+# res = GetLogsByFieldValue(logs_collection)
+# logs = res.get_log_by_field_value("type", "access")
+# for log in logs:
 #     print(f"[LOG]: {log}")
 
-def get_logs_by_date(start_date: str, end_date: str)-> list:
-    start = datetime.fromisoformat(start_date)
-    end = datetime.fromisoformat(end_date)
-    logs = logs_collection.find({"timestamp": {"$gte": start, "$lte": end}})
-    return list(logs)
+class GetLogsByDate:
+    """Класс получает логи по диапазону дат"""
+    def __init__(self, logs_collection: Collection):
+        self.logs_collection = logs_collection
 
-# result_date_logs = get_logs_by_date("2024-05-09 00:00", "2026-05-09 00:00")
-# for log in result_date_logs:
-#     print(f"[DATE_LOG]: {log}")
+    def get_logs_by_date(self, start_date: str, end_date: str, limit: Optional[int]=None)-> list:
+        start = datetime.fromisoformat(start_date)
+        end = datetime.fromisoformat(end_date)
+        logs = self.logs_collection.find({"timestamp": {"$gte": start, "$lte": end}})
 
-def get_cnt_status_code(status_code: int)-> list:
-    """Функция для подсчета логов по статус-коду"""
-    pipeline = [
-        {"$match": {"status_code": status_code}},
-         {"$group": {
-             "_id": "$status_code",
-             "cnt": {"$sum": 1}}
-             }
-    ]
-    result = logs_collection.aggregate(pipeline)
-    return list(result)
+        if limit is not None:
+            logs = logs.limit(limit)
+
+        return list(logs)
     
-# result_cnt_status_code = get_cnt_status_code(200)
-# print(result_cnt_status_code)
+# res = GetLogsByDate(logs_collection)
+# logs = res.get_logs_by_date("2024-05-05", "2026-05-05", 2)
+# for log in logs:
+#     print(f"{log}")
 
-def get_statistic_by_year(value: int)-> list:
-    """Функция подсчета логов за указанный год"""
-    if not isinstance(value, int):
-        value = int(value)
 
-    pipeline = [
-        {"$addFields": {"year": {"$year": "$timestamp"}}},  # <- главная жопаболь
-        {"$match": {"year": value}},  # <- тут пытался искать отсортировать по {"$match": {"$year": value}}
-        {"$count": "cnt"}
-        
+class CountLogsByStatusCode:
+    """Класс подсчета логов по статус коду"""
+    def __init__(self, logs_collection: Collection):
+        self.logs_collection = logs_collection
+
+    def get_cnt_status_code(self, status_code: int)-> list:
+        """Функция для подсчета логов по статус-коду"""
+        pipeline = [
+            {"$match": {"status_code": status_code}},
+            {"$group": {
+                "_id": "$status_code",
+                "cnt": {"$sum": 1}}
+                }
         ]
-    result = logs_collection.aggregate(pipeline)
-    return list(result)
+        logs = self.logs_collection.aggregate(pipeline)
+        return list(logs)
+    
+# res = CountLogsByStatusCode(logs_collection)
+# logs = res.get_cnt_status_code(200)
+# for row in logs:
+#     print(f"[LOG_cnt]: {row}")
+    
 
-if __name__ == "__main__":  # <- до сих пор не понимаю для чего использовать, надо еще раз загуглить
-    result_statistic_by_year = get_statistic_by_year(2025)
-    print(result_statistic_by_year)
+class GetStatisticByYear:
+    """Класс подсчета логов за указанный год"""
+    def __init__(self, logs_collection: Collection):
+        self.logs_collection = logs_collection
+
+    def get_statistic_by_year(self, value: int)-> list:
+        
+        if not isinstance(value, int):
+            value = int(value)
+
+        pipeline = [
+            {"$addFields": {"year": {"$year": "$timestamp"}}},  # <- главная жопаболь
+            {"$match": {"year": value}},  # <- тут пытался искать отсортировать по {"$match": {"$year": value}}
+            {"$count": "cnt"}
+            
+            ]
+        result = self.logs_collection.aggregate(pipeline)
+        return list(result)
+
+# res = GetStatisticByYear(logs_collection)
+# logs = res.get_statistic_by_year(2026)
+# print(logs)
 
 
-def delete_all_logs()-> bool:
-    logs_collection.delete_many({})
-    return True
+class DeleteAllLogs:
+    """Класс удаляет все логи"""
+    def __init__(self, logs_collection: Collection):
+        self.logs_collection = logs_collection
 
+    def delete_all_logs(self)-> bool:
+        self.logs_collection.delete_many({})
+        return True
 
 
 
@@ -222,3 +268,61 @@ test_logs = [
 ]
 # print(delete_all_logs())
 # print(insert_many_logs(test_logs))
+
+class LogServices:
+    def __init__(self, logs_collection: Collection):
+        self.logs_collection = logs_collection
+    
+    def log_error(self, message, stack_trace):
+        log_entry = {
+            "type": "error",
+            "message": message,
+            "stack_trace": stack_trace,
+            "timestamp": datetime.utcnow()
+        }
+
+        self.logs_collection.insert_one(log_entry)
+
+    def log_access(self, ip: str, endpoint: str, method: str, status_code: int):
+        log_entry = {
+            "type": "access",
+            "ip": ip,
+            "endpoint": endpoint,
+            "method": method,
+            "status_code": status_code,
+            "timestamp": datetime.utcnow()
+        }
+
+        self.logs_collection.insert_one(log_entry)
+
+    def get_errors(self, limit: Optional[int] = None, since: Optional[datetime] = None):
+
+        query = {"type": "error"}
+
+        if since:
+            query["timestamp"] = {"$gte": since}
+        logs = self.logs_collection.find(query)
+
+        if limit is not None:
+            logs = logs.limit(limit)
+
+        return list(logs)
+        
+    def get_access(self, limit: Optional[int] = None, since: Optional[datetime] = None):
+
+        query = {"type": "access"}
+
+        if since:
+            query["timestamp"] = {"$gte": since}
+        logs = self.logs_collection.find(query)
+
+        if limit is not None:
+            logs = logs.limit(limit)
+
+        return list(logs)
+    
+log_service = LogServices(logs_collection)
+# add_error_log = log_service.log_error("ошибка входа", "ConnectionError: timeout")
+get_error_log = log_service.get_errors(limit=2)
+for row in get_error_log:
+    print(row)

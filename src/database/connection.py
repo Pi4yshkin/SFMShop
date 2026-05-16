@@ -5,7 +5,7 @@ from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager
 
 
-load_dotenv()
+load_dotenv() 
 
 engine_master = create_engine(f"postgresql://{os.getenv('MASTER_USER')}:{os.getenv('MASTER_PASSWORD', "")}@"
 f"{os.getenv('MASTER_HOST')}:{os.getenv('MASTER_PORT')}/{os.getenv('MASTER_NAME')}")  # URL для мастер
@@ -31,6 +31,6 @@ def get_session(read_only=False):
     except Exception as e:
         if not read_only:
             session.rollback()
-            raise
+        raise
     finally:
         session.close()
